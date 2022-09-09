@@ -24,6 +24,7 @@ namespace RemoteController
             pos.hwheel = 0;
             var bytes = new List<byte> { pos.byte0, pos.byte1, pos.byte2, pos.byte3, pos.byte4, pos.byte5 };
             var encoded = COBS.Encode(bytes).ToArray();
+            Console.WriteLine("start");
             mySerialPort.Write(encoded, 0, encoded.Count());
             for(int i = 0; i < 10; i++)
             {

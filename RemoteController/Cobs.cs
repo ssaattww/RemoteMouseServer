@@ -110,7 +110,7 @@ namespace RemoteController
 				// Ensure the input is formatted correctly (distanceIndex + distance)
 				if (input.Length < distanceIndex + distance || distance < 1)
 				{
-					Trace.WriteLine("Consistent Overhead Byte Stuffing failed to parse an input.");
+                    System.Diagnostics.Debug.WriteLine("Consistent Overhead Byte Stuffing failed to parse an input.");
 					return new List<byte>();
 				}
 
