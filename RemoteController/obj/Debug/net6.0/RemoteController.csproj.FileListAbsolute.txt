@@ -1,0 +1,5 @@
+C:\Users\220011\source\repos\RemoteController\RemoteController\obj\Debug\net6.0\RemoteController.csproj.AssemblyReference.cache
+C:\Users\220011\source\repos\RemoteController\RemoteController\obj\Debug\net6.0\RemoteController.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\220011\source\repos\RemoteController\RemoteController\obj\Debug\net6.0\RemoteController.AssemblyInfoInputs.cache
+C:\Users\220011\source\repos\RemoteController\RemoteController\obj\Debug\net6.0\RemoteController.AssemblyInfo.cs
+C:\Users\220011\source\repos\RemoteController\RemoteController\obj\Debug\net6.0\RemoteController.csproj.CoreCompileInputs.cache
