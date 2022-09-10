@@ -9,16 +9,23 @@ namespace RemoteController
     [SupportedOSPlatform("windows")]
     class PortDataReceived
     {
+        private static bool handled = false;
+        private static List<byte> buffer = new List<byte>();
         public static void Main()
         {
             var devNames = GetDeviceNames().ToList();
+            
             var regComNo = new System.Text.RegularExpressions.Regex("(COM[1-9][0-9]?[0-9]?)");
             var regM5StackDevName = new System.Text.RegularExpressions.Regex("CP210x");
+            
             var m5stackCOM = devNames
                 .Where(devName => regM5StackDevName.IsMatch(devName))
-                .Select(devName => regComNo.Match(devName).Value).FirstOrDefault();
-            Console.WriteLine(m5stackCOM);
-            SerialPort mySerialPort = new SerialPort("COM11");
+                .Select(devName => regComNo.Match(devName).Value)
+                .FirstOrDefault();
+            
+            if (m5stackCOM is null) return;
+
+            SerialPort mySerialPort = new SerialPort(m5stackCOM);
 
             mySerialPort.BaudRate = 115200;
 
@@ -34,20 +41,31 @@ namespace RemoteController
             pos.hwheel = 0;
             var bytes = new List<byte> { pos.byte0, pos.byte1, pos.byte2, pos.byte3, pos.byte4, pos.byte5 };
             var encoded = COBS.Encode(bytes).ToArray();
+            //var reversed = encoded.ToList();
+            //reversed.Reverse();
+            //encoded = reversed.ToArray();
+
             Console.WriteLine("start");
-            mySerialPort.Write(encoded, 0, encoded.Count());
-            for(int i = 0; i < 10; i++)
+            var decoded = new List<byte>();
+
+            for(int i = 0; i < 2; i++)
             {
-                Thread.Sleep(100);
                 mySerialPort.Write(encoded, 0, encoded.Count());
+                while (!handled) Thread.Sleep(10);
+                handled = false;
+                decoded = COBS.Decode(buffer).ToList();
+                if (decoded.SequenceEqual(bytes)) Console.WriteLine("matched");
             }
-            
+
             pos.pressing = 0;
-            
-            Thread.Sleep(100);
-            bytes = new List<byte> { pos.byte0, pos.byte1, pos.byte2, pos.byte3, pos.byte4, pos.byte5 };
+            bytes = new List<byte> { pos.byte5, pos.byte4, pos.byte3, pos.byte2, pos.byte1, pos.byte0 };
             encoded = COBS.Encode(bytes).ToArray();
             mySerialPort.Write(encoded, 0, encoded.Count());
+            
+            while (!handled) Thread.Sleep(10);
+            handled = false;
+            decoded = COBS.Decode(buffer).ToList();
+            if (decoded.SequenceEqual(bytes)) Console.WriteLine("matched");
 
             Console.WriteLine("Press any key to continue...");
             Console.WriteLine();
@@ -60,9 +78,19 @@ namespace RemoteController
                             SerialDataReceivedEventArgs e)
         {
             SerialPort sp = (SerialPort)sender;
-            string indata = sp.ReadExisting();
-            Console.WriteLine("Data Received:");
-            Console.Write(indata);
+            // string indata = sp.ReadExisting();
+            var size = sp.BytesToRead;
+            buffer.Clear();
+
+            Console.WriteLine($"recieved data size:{size}");
+            for(int i = 0; i < size; i++)
+            {
+                buffer.Add((byte)sp.ReadByte());
+            }
+            buffer.ForEach(buf => Console.Write($"{buf},"));
+            Console.WriteLine();
+
+            handled = true;
         }
         public static string[] GetDeviceNames()
         {
