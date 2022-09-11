@@ -49,3 +49,5 @@ C:\Users\taiga\Documents\git\RemoteMouseServer\RemoteController\obj\Debug\net6.0
 C:\Users\taiga\Documents\git\RemoteMouseServer\RemoteController\obj\Debug\net6.0\RemoteController.pdb
 C:\Users\taiga\Documents\git\RemoteMouseServer\RemoteController\obj\Debug\net6.0\RemoteController.genruntimeconfig.cache
 C:\Users\taiga\Documents\git\RemoteMouseServer\RemoteController\obj\Debug\net6.0\ref\RemoteController.dll
+C:\Users\taiga\Documents\git\RemoteMouseServer\RemoteController\bin\Debug\net6.0\System.Reactive.dll
+C:\Users\taiga\Documents\git\RemoteMouseServer\RemoteController\bin\Debug\net6.0\System.Reactive.Linq.dll

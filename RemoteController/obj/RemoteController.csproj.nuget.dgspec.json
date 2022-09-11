@@ -51,6 +51,10 @@
             "System.Management": {
               "target": "Package",
               "version": "[6.0.0, )"
+            },
+            "System.Reactive.Linq": {
+              "target": "Package",
+              "version": "[5.0.0, )"
             }
           },
           "imports": [
