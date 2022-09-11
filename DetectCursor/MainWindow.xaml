@@ -9,9 +9,10 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Image x:Name="imgResult"
-               Margin="10" />
+        <Image x:Name="imgResult" Margin="10" Grid.Row="0" />
+        <TextBlock x:Name="statusText" Margin="10"  Grid.Row="1"/>
     </Grid>
 </Window>

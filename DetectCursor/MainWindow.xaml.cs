@@ -40,22 +40,38 @@ namespace DetectCursor
             using (var capture = new VideoCapture())
             {
                 int deviceIndex = 0;
-                capture.Open(deviceIndex);
-                int maxWidth = 0;
-                int maxHeight = 0;
-                (maxWidth, maxHeight) = getMaxCaptureSize(deviceIndex);
+
+                (var maxWidth, var maxHeight) = getMaxCaptureSize(deviceIndex);
                 capture.Set(VideoCaptureProperties.FrameWidth, maxWidth);
                 capture.Set(VideoCaptureProperties.FrameHeight, maxHeight);
+                capture.Open(deviceIndex);
 
                 // キャプチャした画像のコピー先となるWriteableBitmapを作成
                 wb = new WriteableBitmap(capture.FrameWidth, capture.FrameHeight, 96, 96, PixelFormats.Bgr24, null);
+
+                await QueryFrameAsync(capture, _flame);
+
+                Checker.Execute(capture);
+                // H min 5   max 13
+                // S min 188 max 255
+                // V min 180 max 255
+                var scalar_min = new Scalar(5, 188, 180);
+                var scalar_max = new Scalar(13, 255, 255);
+                var maskedMat = new Mat();
+                var hsvMat = new Mat();
+
                 while (true)
                 {
                     if (!capture.IsOpened()) break;
                     await QueryFrameAsync(capture, _flame);
                     if (_flame.Empty()) break;
+
                     WriteableBitmapConverter.ToWriteableBitmap(_flame, wb);
                     imgResult.Source = wb;
+                    statusText.Text = "";
+                    Cv2.CvtColor(_flame, hsvMat, ColorConversionCodes.BGR2HSV, 3);
+                    Cv2.InRange(hsvMat, scalar_min, scalar_max, maskedMat);
+                    //Cv2.HoughCircles(maskedMat, 2, 20, );
                 }
             }
         }
