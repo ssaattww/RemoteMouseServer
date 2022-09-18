@@ -18,9 +18,9 @@ namespace DetectCursor
         private static int _v_min = 180;
         private static int _v_max = 255;
 
-        private static int _param2 = 100;
+        private static int _param2 = 25;
         private static int _min_radius = 50;
-        private static int _max_radius = 100;
+        private static int _max_radius = 60;
 
         private static Mat src = new Mat();
         private static Mat hsv = new Mat();
@@ -51,7 +51,7 @@ namespace DetectCursor
             Cv2.CreateTrackbar("param2", WINDOW_NAME, count:255, onChange: Param2_Changed, value: ref _param2);
             Cv2.CreateTrackbar("minRadius", WINDOW_NAME, count:255, onChange: MinRadius_Changed, value: ref _min_radius);
             Cv2.CreateTrackbar("maxRadius", WINDOW_NAME, count:255, onChange: MaxRadius_Changed, value: ref _max_radius);
-
+            
             //初期画像を表示
             Cv2.ImShow(WINDOW_NAME, src);
 
@@ -126,23 +126,60 @@ namespace DetectCursor
             //HSV画像とスライダーの値からマスクを生成
             var scalar_min = new Scalar(_h_min, _s_min, _v_min);
             var scalar_max = new Scalar(_h_max, _s_max, _v_max);
+            
             Mat mask = new Mat();
-            Cv2.CvtColor(src, hsv, ColorConversionCodes.BGR2HSV, 3);
-            Cv2.InRange(hsv, scalar_min, scalar_max, mask);
+            
+            Mat closedHsv = new Mat();
+            Mat clesedMask = new Mat();
+            Mat clesedMask2 = new Mat();
 
+            var cannyHsv = new Mat();
+            var cannyMask = new Mat();
+
+            Cv2.CvtColor(src, hsv, ColorConversionCodes.BGR2HSV, 3);
+
+            Cv2.MedianBlur(hsv, hsv, 3);
+            Cv2.MorphologyEx(hsv, closedHsv, MorphTypes.Close, Cv2.GetStructuringElement(MorphShapes.Rect, new Size(2, 2)));
+            //Cv2.MorphologyEx(closedHsv, closedTwiceHsv, MorphTypes.Close, Cv2.GetStructuringElement(MorphShapes.Rect, new Size(2, 2)));
+
+            Cv2.InRange(hsv, scalar_min, scalar_max, mask);
+            Cv2.InRange(closedHsv, scalar_min, scalar_max, clesedMask);
+            //Cv2.InRange(cannyHsv, scalar_min, scalar_max, cannyMask);
+
+            //Cv2.MorphologyEx(clesedMask, cannyMask, MorphTypes.Close, Cv2.GetStructuringElement(MorphShapes.Rect, new Size(2, 2)));
+            //Cv2.Canny(clesedMask, cannyMask, 5, 10);
             //マスク画像を使って元画像にフィルタをかける
             Mat dst = new Mat();
+            Mat cannyDst = new Mat();
+
             src.CopyTo(dst, mask);
-            UpdateHough(mask, dst);
+            //src.CopyTo(cannyDst, cannyHsv);
+            // Cv2.MorphologyEx(mask, opened, MorphTypes.Open, Cv2.GetGaussianKernel(10,-1));
+            //Cv2.MorphologyEx(mask, closed, MorphTypes.Close, Cv2.GetGaussianKernel(20, -1));
+            //Cv2.BilateralFilter(mask, bilateraled, 10, 50, 50);
+            
+            
+
+            UpdateHough(clesedMask, dst);
+            //UpdateHough(cannyHsv, cannyDst);
+
             //ウィンドウの画像を更新
             Cv2.ImShow(WINDOW_NAME, dst);
+
+            // Cv2.ImShow("cannyMask", cannyMask);
+            //Cv2.ImShow("canny", cannyDst);
+            Cv2.ImShow("closed", clesedMask);
+            Cv2.ImShow("closed", dst);
             //Cv2.ImShow("mask", mask);
+
+
         }
 
         private static void UpdateHough(Mat mask, Mat outPut)
         {
-            var segs = Cv2.HoughCircles(mask, HoughModes.Gradient, 2, 20, 100, _param2, _min_radius, _max_radius);
-            foreach (var seg in segs) Cv2.Circle(outPut, (int)seg.Center.X, (int)seg.Center.Y, (int)seg.Radius, new Scalar(0, 165, 255), 5);
+            var segs = Cv2.HoughCircles(mask, HoughModes.Gradient, 2, 100, 100, _param2, _min_radius, _max_radius);
+            foreach (var seg in segs) Cv2.Circle(outPut, (int)seg.Center.X, (int)seg.Center.Y, (int)seg.Radius, new Scalar(0, 255, 0), 5);
+            
         }
     }
 }

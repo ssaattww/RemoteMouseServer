@@ -16,4 +16,8 @@
     <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.6.0.20220608" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\RemoteController\RemoteController.csproj" />
+  </ItemGroup>
+
 </Project>

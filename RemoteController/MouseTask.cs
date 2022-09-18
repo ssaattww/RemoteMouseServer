@@ -13,7 +13,7 @@ using System.Runtime.Versioning;
 namespace RemoteController
 {
     [SupportedOSPlatform("windows")]
-    internal class MouseTask
+    public class MouseTask
     {
         private SerialPort serialPort;
 
@@ -55,9 +55,21 @@ namespace RemoteController
                         for (int i = 0; i < size; i++) buf.Add((byte)sp.ReadByte());
                     }
                     return buf;
-                }).Take(1);
+                })
+                .Timeout(
+                    TimeSpan.FromMilliseconds(500),
+                    Observable.Create<List<byte>>(o =>
+                    {
+                        // -1を流して完了
+                        o.OnNext(new List<byte>());
+                        o.OnCompleted();
+                        return () => Console.WriteLine("time out");
+                    }))
+                .Take(1);
                 serialPort.Write(encodedBytes, 0, encodedBytes.Length);
                 recievedBytes = await recievedBytesObserbable;
+                if (recievedBytes.Count!=7) return false;
+                //return false;
                 decodedBytes = COBS.Decode(recievedBytes).ToList();
 
                 return sendBytes.SequenceEqual(decodedBytes);
