@@ -42,7 +42,9 @@ namespace RemoteController
                 var sendBytes = new List<byte> { pos.byte0, pos.byte1, pos.byte2, pos.byte3, pos.byte4, pos.byte5 };
                 var recievedBytes = new List<byte>();
                 
-                var encodedBytes = COBS.Encode(sendBytes).ToArray();
+                var encodedBytes = COBS.Encode(sendBytes).ToList();
+                encodedBytes.Add(0x00);
+                var encodedArr = encodedBytes.ToArray();
                 var decodedBytes = new List<byte>();
 
                 var recievedBytesObserbable = serialObserbable.Select(sender =>
@@ -65,9 +67,13 @@ namespace RemoteController
                         o.OnCompleted();
                         return () => Console.WriteLine("time out");
                     }))
-                .Take(1);
-                serialPort.Write(encodedBytes, 0, encodedBytes.Length);
-                recievedBytes = await recievedBytesObserbable;
+                .Take(1)
+                .PublishLast();
+                recievedBytesObserbable.Connect();
+
+                serialPort.Write(encodedArr, 0, encodedArr.Length);
+                // recievedBytes = await recievedBytesObserbable;
+                recievedBytes = recievedBytesObserbable.Wait();
                 if (recievedBytes.Count!=7) return false;
                 //return false;
                 decodedBytes = COBS.Decode(recievedBytes).ToList();
