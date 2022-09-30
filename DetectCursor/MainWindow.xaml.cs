@@ -68,7 +68,8 @@ namespace DetectCursor
                 var hsvMat = new Mat();
                 using (var m5stackSp = MouseTask.getM5StackSerialPort())
                 {
-                    m5stackSp.BaudRate = 115200;
+                    // m5stackSp.BaudRate = 115200;
+                    m5stackSp.BaudRate = 9600;
                     m5stackSp.Open();
 
                     var mouse = new MouseTask(m5stackSp);
@@ -95,14 +96,18 @@ namespace DetectCursor
                                 (var curPosX, var curPosY) = circles.Select(c => (c.Center.X, c.Center.Y)).FirstOrDefault();
                                 statusText.Text = $"{curPosX} : {curPosY}";
                                 var pos = new MousePos { buttons = 0, pressing = 0 };
-                                if (curPosX < 950) pos.x = 5;
-                                else if(curPosX > 950) pos.x = -5;
+                                if (curPosX < 950) pos.x = 1;
+                                else if(curPosX > 950) pos.x = -1;
 
-                                if(curPosY < 530) pos.y = 5;
-                                else if( curPosY > 530) pos.y = -5;
+                                if(curPosY < 530) pos.y = 1;
+                                else if( curPosY > 530) pos.y = -1;
 
                                 var res = await mouse.Move(pos);
                                 statusText.Text = $"{curPosX}/{curPosY} : {pos.x} : {pos.y}";
+                            }
+                            else
+                            {
+                                await mouse.Move(new MousePos {buttons=0, pressing=0, x=1, y=1 });
                             }
                         }
 
