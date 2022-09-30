@@ -15,7 +15,8 @@ namespace RemoteController
         {
             using (var m5stackSp = MouseTask.getM5StackSerialPort())
             {
-                m5stackSp.BaudRate = 115200;
+                //m5stackSp.BaudRate = 115200;
+                m5stackSp.BaudRate = 9600;
                 m5stackSp.Open();
 
                 var mouse = new MouseTask(m5stackSp);
